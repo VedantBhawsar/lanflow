@@ -1,6 +1,3 @@
-import { memo, useMemo, useRef, useState } from "react";
-import { useHotkeys } from "react-hotkeys-hook";
-import { useShallow } from "zustand/react/shallow";
 import IconComponent from "@/components/common/genericIconComponent";
 import ShadTooltip from "@/components/common/shadTooltipComponent";
 import FlowSettingsComponent from "@/components/core/flowSettingsComponent";
@@ -14,6 +11,7 @@ import {
 import { SAVED_HOVER } from "@/constants/constants";
 import { useGetRefreshFlowsQuery } from "@/controllers/API/queries/flows/use-get-refresh-flows-query";
 import { useGetFoldersQuery } from "@/controllers/API/queries/folders/use-get-folders";
+import { ENABLE_BUILDER_ONLY_MODE } from "@/customization/feature-flags";
 import { useCustomNavigate } from "@/customization/hooks/use-custom-navigate";
 import useSaveFlow from "@/hooks/flows/use-save-flow";
 import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
@@ -23,6 +21,9 @@ import useFlowsManagerStore from "@/stores/flowsManagerStore";
 import { useShortcutsStore } from "@/stores/shortcuts";
 import { swatchColors } from "@/utils/styleUtils";
 import { cn, getNumberFromString } from "@/utils/utils";
+import { memo, useMemo, useRef, useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
+import { useShallow } from "zustand/react/shallow";
 
 export const MenuBar = memo((): JSX.Element => {
   const setSuccessData = useAlertStore((state) => state.setSuccessData);
@@ -95,43 +96,47 @@ export const MenuBar = memo((): JSX.Element => {
           className="relative flex w-full items-center justify-center gap-2"
           data-testid="menu_bar_wrapper"
         >
-          <div
-            className="header-menu-bar hidden max-w-40 justify-end truncate md:flex xl:max-w-full"
-            data-testid="menu_flow_bar"
-            id="menu_flow_bar_navigation"
-          >
-            {currentFolder?.name && (
-              <div className="hidden truncate md:flex">
-                <div
-                  className="cursor-pointer truncate text-sm text-muted-foreground hover:text-primary"
-                  onClick={() => {
-                    navigate(
-                      currentFolder?.id
-                        ? "/all/folder/" + currentFolder.id
-                        : "/all",
-                    );
-                  }}
-                >
-                  {currentFolder?.name}
+          {!ENABLE_BUILDER_ONLY_MODE && (
+            <div
+              className="header-menu-bar hidden max-w-40 justify-end truncate md:flex xl:max-w-full"
+              data-testid="menu_flow_bar"
+              id="menu_flow_bar_navigation"
+            >
+              {currentFolder?.name && (
+                <div className="hidden truncate md:flex">
+                  <div
+                    className="cursor-pointer truncate text-sm text-muted-foreground hover:text-primary"
+                    onClick={() => {
+                      navigate(
+                        currentFolder?.id
+                          ? "/all/folder/" + currentFolder.id
+                          : "/all",
+                      );
+                    }}
+                  >
+                    {currentFolder?.name}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-          <div
-            className="hidden w-fit shrink-0 select-none font-normal text-muted-foreground md:flex"
-            data-testid="menu_bar_separator"
-          >
-            /
-          </div>
+              )}
+            </div>
+          )}
+          {!ENABLE_BUILDER_ONLY_MODE && (
+            <div
+              className="hidden w-fit shrink-0 select-none font-normal text-muted-foreground md:flex"
+              data-testid="menu_bar_separator"
+            >
+              /
+            </div>
+          )}
           <div className={cn(`flex rounded p-1`, swatchColors[swatchIndex])}>
             <IconComponent
               name={currentFlowIcon ?? "Workflow"}
               className="h-3.5 w-3.5"
             />
           </div>
-          <PopoverTrigger asChild>
+          {ENABLE_BUILDER_ONLY_MODE ? (
             <div
-              className="group relative -mr-5 flex shrink-0 cursor-pointer items-center gap-2 text-sm sm:whitespace-normal"
+              className="group relative -mr-5 flex shrink-0 items-center gap-2 text-sm sm:whitespace-normal"
               data-testid="menu_bar_display"
             >
               <span
@@ -142,16 +147,32 @@ export const MenuBar = memo((): JSX.Element => {
               >
                 {currentFlowName || "Untitled Flow"}
               </span>
-              <IconComponent
-                name="pencil"
-                className={cn(
-                  "h-5 w-3.5 -translate-x-2 opacity-0 transition-all",
-                  !openSettings &&
-                    "sm:group-hover:translate-x-0 sm:group-hover:opacity-100",
-                )}
-              />
             </div>
-          </PopoverTrigger>
+          ) : (
+            <PopoverTrigger asChild>
+              <div
+                className="group relative -mr-5 flex shrink-0 cursor-pointer items-center gap-2 text-sm sm:whitespace-normal"
+                data-testid="menu_bar_display"
+              >
+                <span
+                  ref={measureRef}
+                  className="w-fit max-w-[35vw] truncate whitespace-pre text-mmd font-semibold sm:max-w-full sm:text-sm"
+                  aria-hidden="true"
+                  data-testid="flow_name"
+                >
+                  {currentFlowName || "Untitled Flow"}
+                </span>
+                <IconComponent
+                  name="pencil"
+                  className={cn(
+                    "h-5 w-3.5 -translate-x-2 opacity-0 transition-all",
+                    !openSettings &&
+                    "sm:group-hover:translate-x-0 sm:group-hover:opacity-100",
+                  )}
+                />
+              </div>
+            </PopoverTrigger>
+          )}
           <div className={"ml-5 hidden shrink-0 items-center sm:flex"}>
             {!autoSaving && (
               <ShadTooltip
@@ -161,12 +182,12 @@ export const MenuBar = memo((): JSX.Element => {
                       ? "Saving..."
                       : "Save Changes"
                     : SAVED_HOVER +
-                      (updatedAt
-                        ? new Date(updatedAt).toLocaleString("en-US", {
-                            hour: "numeric",
-                            minute: "numeric",
-                          })
-                        : "Never")
+                    (updatedAt
+                      ? new Date(updatedAt).toLocaleString("en-US", {
+                        hour: "numeric",
+                        minute: "numeric",
+                      })
+                      : "Never")
                 }
                 side="bottom"
                 styleClasses="cursor-default z-10"
