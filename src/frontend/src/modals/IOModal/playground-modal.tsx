@@ -1,17 +1,17 @@
 //import LangflowLogoColor from "@/assets/LangflowLogocolor.svg?react";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useShallow } from "zustand/react/shallow";
 import ThemeButtons from "@/components/core/appHeaderComponent/components/ThemeButtons";
 import { useGetMessagesQuery } from "@/controllers/API/queries/messages";
 import { useDeleteSession } from "@/controllers/API/queries/messages/use-delete-sessions";
 import { useGetSessionsFromFlowQuery } from "@/controllers/API/queries/messages/use-get-sessions-from-flow";
-import { ENABLE_PUBLISH } from "@/customization/feature-flags";
+import { ENABLE_BUILDER_ONLY_MODE, ENABLE_PUBLISH } from "@/customization/feature-flags";
 import { track } from "@/customization/utils/analytics";
 import { customOpenNewTab } from "@/customization/utils/custom-open-new-tab";
 import { LangflowButtonRedirectTarget } from "@/customization/utils/urls";
 import { useUtilityStore } from "@/stores/utilityStore";
 import { swatchColors } from "@/utils/styleUtils";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 import LangflowLogoColor from "../../assets/LangflowLogoColor.svg?react";
 import IconComponent from "../../components/common/genericIconComponent";
 import ShadTooltip from "../../components/common/shadTooltipComponent";
@@ -358,9 +358,11 @@ export default function IOModal({
             <div
               className={cn(
                 "flex h-full flex-shrink-0 flex-col justify-start overflow-hidden transition-all duration-300",
-                sidebarOpen
-                  ? "absolute z-50 lg:relative lg:w-1/5 lg:max-w-[280px]"
-                  : "w-0",
+                ENABLE_BUILDER_ONLY_MODE ? "hidden" : (
+                  sidebarOpen
+                    ? "absolute z-50 lg:relative lg:w-1/5 lg:max-w-[280px]"
+                    : "w-0"
+                ),
               )}
             >
               <div
@@ -395,7 +397,10 @@ export default function IOModal({
                   >
                     <Button
                       variant="ghost"
-                      className="flex h-8 w-8 items-center justify-center !p-0"
+                      className={cn(
+                        "flex h-8 w-8 items-center justify-center !p-0",
+                        ENABLE_BUILDER_ONLY_MODE && "hidden"
+                      )}
                       onClick={() => setSidebarOpen(!sidebarOpen)}
                     >
                       <IconComponent
@@ -405,7 +410,7 @@ export default function IOModal({
                     </Button>
                   </ShadTooltip>
                 </div>
-                {sidebarOpen && !sessionsLoading && (
+                {sidebarOpen && !sessionsLoading && !ENABLE_BUILDER_ONLY_MODE && (
                   <SidebarOpenView
                     sessions={sessions}
                     setSelectedViewField={setSelectedViewField}

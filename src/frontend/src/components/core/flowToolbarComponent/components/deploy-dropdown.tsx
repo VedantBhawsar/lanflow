@@ -12,7 +12,11 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { usePatchUpdateFlow } from "@/controllers/API/queries/flows/use-patch-update-flow";
 import { CustomLink } from "@/customization/components/custom-link";
-import { ENABLE_PUBLISH, ENABLE_WIDGET } from "@/customization/feature-flags";
+import {
+  ENABLE_PUBLISH,
+  ENABLE_WIDGET,
+  ENABLE_BUILDER_ONLY_MODE,
+} from "@/customization/feature-flags";
 import { customMcpOpen } from "@/customization/utils/custom-mcp-open";
 import ApiModal from "@/modals/apiModal";
 import EmbedModal from "@/modals/EmbedModal/embed-modal";
@@ -32,6 +36,11 @@ export default function PublishDropdown({
   openApiModal,
   setOpenApiModal,
 }: PublishDropdownProps) {
+  // Hide Share/Deploy dropdown in builder-only mode
+  if (ENABLE_BUILDER_ONLY_MODE) {
+    return null;
+  }
+
   const location = useHref("/");
   const domain = window.location.origin + location;
   const [openEmbedModal, setOpenEmbedModal] = useState(false);

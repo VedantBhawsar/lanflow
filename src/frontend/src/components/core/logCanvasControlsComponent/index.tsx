@@ -1,9 +1,15 @@
-import { Panel } from "@xyflow/react";
 import ForwardedIconComponent from "@/components/common/genericIconComponent";
 import { Button } from "@/components/ui/button";
+import { ENABLE_BUILDER_ONLY_MODE } from "@/customization/feature-flags";
 import FlowLogsModal from "@/modals/flowLogsModal";
+import { Panel } from "@xyflow/react";
 
 const LogCanvasControls = () => {
+  // Hide Logs button in builder-only mode
+  if (ENABLE_BUILDER_ONLY_MODE) {
+    return null;
+  }
+
   return (
     <Panel
       data-testid="canvas_controls"
