@@ -1,5 +1,3 @@
-import { type Dispatch, type SetStateAction, useState } from "react";
-import { useHref } from "react-router-dom";
 import IconComponent from "@/components/common/genericIconComponent";
 import ShadTooltipComponent from "@/components/common/shadTooltipComponent";
 import { Button } from "@/components/ui/button";
@@ -13,9 +11,9 @@ import { Switch } from "@/components/ui/switch";
 import { usePatchUpdateFlow } from "@/controllers/API/queries/flows/use-patch-update-flow";
 import { CustomLink } from "@/customization/components/custom-link";
 import {
+  ENABLE_BUILDER_ONLY_MODE,
   ENABLE_PUBLISH,
   ENABLE_WIDGET,
-  ENABLE_BUILDER_ONLY_MODE,
 } from "@/customization/feature-flags";
 import { customMcpOpen } from "@/customization/utils/custom-mcp-open";
 import ApiModal from "@/modals/apiModal";
@@ -23,9 +21,11 @@ import EmbedModal from "@/modals/EmbedModal/embed-modal";
 import ExportModal from "@/modals/exportModal";
 import useAlertStore from "@/stores/alertStore";
 import useAuthStore from "@/stores/authStore";
-import useFlowStore from "@/stores/flowStore";
 import useFlowsManagerStore from "@/stores/flowsManagerStore";
+import useFlowStore from "@/stores/flowStore";
 import { cn } from "@/utils/utils";
+import { type Dispatch, type SetStateAction, useState } from "react";
+import { useHref } from "react-router-dom";
 
 type PublishDropdownProps = {
   openApiModal: boolean;
@@ -136,7 +136,7 @@ export default function PublishDropdown({
           >
             <DropdownMenuItem
               className="deploy-dropdown-item group"
-              onClick={() => {}}
+              onClick={() => { }}
               data-testid="mcp-server-item"
             >
               <IconComponent name="Mcp" className={`icon-size mr-2`} />
@@ -161,7 +161,7 @@ export default function PublishDropdown({
             <DropdownMenuItem
               className="deploy-dropdown-item group"
               disabled={!hasIO}
-              onClick={() => {}}
+              onClick={() => { }}
               data-testid="shareable-playground"
             >
               <div className="flex w-full items-center justify-between">
